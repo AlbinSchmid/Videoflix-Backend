@@ -27,7 +27,7 @@ class UserAlreadyVerified(APIException):
 
 class IncorrectUrl(APIException):
     status_code = 400
-    default_detail = 'Invalid link.'
+    default_detail = 'Invalid activation link.'
     default_code = 'incorrect link'
 
 class IncorrectToken(APIException):
