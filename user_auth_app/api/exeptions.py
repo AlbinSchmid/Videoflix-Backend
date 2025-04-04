@@ -17,7 +17,7 @@ class EmailOrPasswordIncorrect(APIException):
 
 class NotVerified(APIException):
     status_code = 400
-    default_detail = 'User is not verified.'
+    default_detail = 'Please verify your account before logging in.'
     default_code = 'not verified'
 
 class UserAlreadyVerified(APIException):

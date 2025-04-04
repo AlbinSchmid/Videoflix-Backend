@@ -11,6 +11,23 @@ from django.contrib.auth.tokens import default_token_generator
 from .exeptions import UserAlreadyVerified, IncorrectUrl, IncorrectToken
 
 
+class CheckEmailView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        user = CustomUser.objects.filter(email=email).exists()
+
+        if user:
+            return Response(
+                {'exist': True},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {'exist': False},
+                status=status.HTTP_200_OK
+            )
+
+
 class ActivateUserView(APIView):
     def post(self, request):
         uidb64 = request.data.get('uid')
@@ -20,7 +37,7 @@ class ActivateUserView(APIView):
             user = CustomUser.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             raise IncorrectUrl
-        
+
         if user.is_active:
             raise UserAlreadyVerified
 
@@ -33,7 +50,7 @@ class ActivateUserView(APIView):
 
 
 class LoginView(ObtainAuthToken):
-    
+
     def post(self, request):
         serializer = EmailLogInSerializer(data=request.data)
         data = {}
@@ -51,7 +68,7 @@ class LoginView(ObtainAuthToken):
 
 
 class RegistrationView(APIView):
-    
+
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
 
