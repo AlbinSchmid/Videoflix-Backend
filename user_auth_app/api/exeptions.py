@@ -20,6 +20,11 @@ class NotVerified(APIException):
     default_detail = 'Please verify your account before logging in.'
     default_code = 'not verified'
 
+class NotVerifiedForgotPassword(APIException):
+    status_code = 400
+    default_detail = 'Please verify your account before reset your password.'
+    default_code = 'not verified'
+
 class UserAlreadyVerified(APIException):
     status_code = 409
     default_detail = 'This account has already been verified.'
@@ -27,10 +32,17 @@ class UserAlreadyVerified(APIException):
 
 class IncorrectUrl(APIException):
     status_code = 400
-    default_detail = 'Invalid activation link.'
+    default_detail = 'The link you used is invalid or no longer active.'
     default_code = 'incorrect link'
 
-class IncorrectToken(APIException):
+class UserNotFound(APIException):
+    status_code = 404
+    default_detail = 'User with this email was not found.'
+    default_code = 'user not found'
+
+class PasswordSameAsOld(APIException):
     status_code = 400
-    default_detail = 'Token invalid or expired'
-    default_code = 'incorrect token'
+    default_detail = 'New password cannot be the same as the old one. Please choose a different password.'
+    default_code = 'password same as old'
+
+
