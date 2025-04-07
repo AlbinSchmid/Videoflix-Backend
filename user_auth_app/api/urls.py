@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import LoginView, RegistrationView, ActivateUserView, CheckEmailView, ForgotPasswordView, ResetPasswordView, CheckPasswordToken
+from .views import *
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),

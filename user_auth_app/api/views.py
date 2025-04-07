@@ -1,4 +1,3 @@
-from rest_framework import generics
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -106,7 +105,8 @@ class CheckEmailView(APIView):
 
         if user:
             return Response(
-                {'exist': True},
+                {'exist': True,
+                 'message': 'This email is already registered. You have been redirected to the login page.'},
                 status=status.HTTP_200_OK
             )
         else:
