@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'user_auth_app.apps.UserAuthAppConfig',
-    'movie_app.apps.MovieAppConfig'
+    'movie_app.apps.MovieAppConfig',
+    'django_rq',
 ]
 
 AUTH_USER_MODEL = 'user_auth_app.CustomUser'
@@ -64,8 +65,6 @@ MIDDLEWARE = [
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
-
-CACHE_TTL = 60*15
 
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:4200',
@@ -160,6 +159,8 @@ REST_FRAMEWORK = {
     ]
 }
 
+CACHE_TTL = 60*15
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -182,3 +183,16 @@ EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        # 'PASSWORD': config('REDIS_PASSWORD'),
+        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_RESULT_TTL': 800,
+        'SOCKET_TIMEOUT': 20,   # Wichtig für Idle-Verbindungen
+    },
+}
+

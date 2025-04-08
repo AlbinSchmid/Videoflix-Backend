@@ -31,4 +31,5 @@ class Movie(models.Model):
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     video_file = models.FileField(upload_to='movies')
+    movie_cover_phone = models.FileField(upload_to='phone_covers')
     movie_cover = models.FileField(upload_to='covers')
