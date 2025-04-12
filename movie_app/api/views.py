@@ -3,11 +3,9 @@ from movie_app.models import Movie
 from .serializer import MovieSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.core.cache import caches
 
 
 class MovieListView(generics.ListAPIView):
-    print(f"Aktiver Cache-Backend: {type(caches['default'])}")
     permission_classes = [AllowAny]
     serializer_class = MovieSerializer
     queryset = Movie.objects.all()

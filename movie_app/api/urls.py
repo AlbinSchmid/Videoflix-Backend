@@ -8,5 +8,5 @@ from django.conf import settings
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 urlpatterns = [
-    path('movies/', cache_page(CACHE_TTL)(MovieListView.as_view()), name='movies'),
+    path('movies/', MovieListView.as_view(), name='movies'),
 ]

@@ -14,6 +14,11 @@ from pathlib import Path
 from decouple import config
 import os
 
+import mimetypes
+
+mimetypes.add_type("application/vnd.apple.mpegurl", ".m3u8")
+mimetypes.add_type("video/mp2t", ".ts")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -46,6 +51,7 @@ INSTALLED_APPS = [
     'user_auth_app.apps.UserAuthAppConfig',
     'movie_app.apps.MovieAppConfig',
     'django_rq',
+    'import_export',
 ]
 
 AUTH_USER_MODEL = 'user_auth_app.CustomUser'
@@ -66,6 +72,7 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:4200',
     'http://localhost:4200',
@@ -189,10 +196,14 @@ RQ_QUEUES = {
         'HOST': 'localhost',
         'PORT': 6379,
         'DB': 0,
-        # 'PASSWORD': config('REDIS_PASSWORD'),
+        'PASSWORD': 'foobared',
         'DEFAULT_TIMEOUT': 360,
         'DEFAULT_RESULT_TTL': 800,
         'SOCKET_TIMEOUT': 20,   # Wichtig für Idle-Verbindungen
     },
 }
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/staticfiles')
 

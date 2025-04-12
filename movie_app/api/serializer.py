@@ -2,14 +2,12 @@ from rest_framework import serializers
 from movie_app.models import Movie
 
 class MovieSerializer(serializers.ModelSerializer):
-    movie_cover = serializers.SerializerMethodField()
+    hls_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'category', 'movie_cover', 'movie_cover_phone', 'hls_url']
 
-    def get_movie_cover(self, obj):
+    def get_hls_url(self, obj):
         request = self.context.get('request')
-        if obj.movie_cover and request:
-            return request.build_absolute_uri(obj.movie_cover.url)
-        return None
+        return request.build_absolute_uri(f'/media/movies/{obj.slug}/master.m3u8')
