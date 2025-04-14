@@ -3,6 +3,7 @@ from movie_app.models import Movie
 from .serializer import MovieSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class MovieListView(generics.ListAPIView):
@@ -25,3 +26,9 @@ class MovieListView(generics.ListAPIView):
             serializer = MovieSerializer(movies, many=True, context=context)
             data[category.lower()] = serializer.data
         return Response(data)
+    
+class MovieBySlugView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = MovieSerializer
+    lookup_field = 'slug'
+    queryset = Movie.objects.all()
