@@ -6,8 +6,8 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ['id', 'title', 'description', 'category', 'movie_cover', 'movie_cover_phone', 'hls_url']
+        fields = ['id', 'title', 'description', 'category', 'movie_cover', 'movie_cover_phone', 'hls_url', 'author', 'author_url', 'license', 'license_url', 'release_year']
 
     def get_hls_url(self, obj):
         request = self.context.get('request')
-        return request.build_absolute_uri(f'/media/movies/{obj.slug}/master.m3u8')
+        return request.build_absolute_uri(f'/media/movies/{obj.slug}/{obj.slug}.m3u8')
