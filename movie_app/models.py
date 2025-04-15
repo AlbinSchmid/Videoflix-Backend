@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from user_auth_app.models import CustomUser
 
 # Create your models here.
 
@@ -45,3 +46,13 @@ class Movie(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+
+class UserMovieProgress(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    progress_seconds = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta: 
+        unique_together = ('user', 'movie')

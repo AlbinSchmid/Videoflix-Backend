@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from decouple import config
 import os
+from datetime import timedelta
 
 import mimetypes
 
@@ -162,12 +163,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'user_auth_app.api.authentication.CookieJWTAuthentication',
+    ),
 }
 
 CACHE_TTL = 60*15
@@ -210,3 +208,15 @@ RQ_QUEUES = {
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/staticfiles')
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+AUTHENTICATION_BACKENDS = [
+    'user_auth_app.api.backends.EmailBackend',  # ← dein Custom-Backend
+    'django.contrib.auth.backends.ModelBackend',  # optional fallback
+]

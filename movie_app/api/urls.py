@@ -10,4 +10,5 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 urlpatterns = [
     path('movies/', MovieListView.as_view(), name='movies'),
     path('movies/<slug:slug>/', MovieBySlugView.as_view(), name='movies-by-slug'),
+    path('movie/time/', UserMovieProgressView.as_view(), name='user-movie-progress'),
 ]

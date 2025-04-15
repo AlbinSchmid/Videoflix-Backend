@@ -1,21 +1,20 @@
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from user_auth_app.models import CustomUser
-from .serializers import RegistrationSerializer, EmailLogInSerializer
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.tokens import default_token_generator
-from .exeptions import UserAlreadyVerified, IncorrectUrl, UserNotFound, NotVerifiedForgotPassword, PasswordNotMatch, PasswordSameAsOld
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.template.loader import render_to_string
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth import authenticate
+from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
-from rest_framework.exceptions import ValidationError
+from user_auth_app.models import CustomUser 
+from .serializers import RegistrationSerializer, UserSerializer
+from .exeptions import UserAlreadyVerified, IncorrectUrl, UserNotFound, NotVerifiedForgotPassword, PasswordNotMatch, PasswordSameAsOld, EmailOrPasswordIncorrect, NotVerified
 
 class CheckPasswordToken(APIView):
     def post(self, request):
@@ -136,22 +135,44 @@ class ActivateUserView(APIView):
         raise IncorrectUrl
 
 
-class LoginView(ObtainAuthToken):
+class ProtectedView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
+class LogoutView(APIView):
     def post(self, request):
-        serializer = EmailLogInSerializer(data=request.data)
-        data = {}
+        response = Response({"message": "Logout successful"})
+        response.delete_cookie('access_token') 
+        return response
 
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            token, create = Token.objects.get_or_create(user=user)
-            data = {
-                'token': token.key,
-                'email': user.email,
-                'id': user.id
-            }
-            return Response(data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CustomLogInView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        user = authenticate(email=email, password=password)
+
+        if user:
+            if not user.is_active:
+                raise NotVerified
+            
+            refresh = RefreshToken.for_user(user)
+
+            response = Response({'message': 'Login successful'})
+            response.set_cookie(
+                key='access_token',
+                value=str(refresh.access_token),
+                httponly=True,
+                secure=False,  # nur über HTTPS!
+                samesite='Lax',  # oder 'Strict'
+                max_age=60 * 60 * 24,  # 1 Tag
+            )
+            return response
+        raise EmailOrPasswordIncorrect
 
 
 class RegistrationView(APIView):
@@ -161,6 +182,5 @@ class RegistrationView(APIView):
 
         if serializer.is_valid():
             user = serializer.save()
-            token = Token.objects.create(user=user)
             return Response({'message': 'Registration successful! Please check your email to verify your account before logging in.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
