@@ -1,14 +1,14 @@
 from django.contrib import admin
 from django.urls import path
-from .views import *
-from django.core.cache.backends.base import DEFAULT_TIMEOUT
-from django.views.decorators.cache import cache_page
 from django.conf import settings
+from django.views.decorators.cache import cache_page
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from .views import *
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 urlpatterns = [
     path('movies/', MovieListView.as_view(), name='movies'),
-    path('movies/<slug:slug>/', MovieBySlugView.as_view(), name='movies-by-slug'),
-    path('movie/time/', UserMovieProgressView.as_view(), name='user-movie-progress'),
+    path('movies/progress/', UserMovieProgressListView.as_view(), name='movie-progress'),
+    path('movie/progress/<slug:slug>/', UserMovieProgressDetailView.as_view(), name='movie-progress-detail'),
 ]

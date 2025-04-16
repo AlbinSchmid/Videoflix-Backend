@@ -14,9 +14,10 @@ class MovieSerializer(serializers.ModelSerializer):
     
 
 class UserMovieProgressSerializer(serializers.ModelSerializer):
-    movie = MovieSerializer()
-    movie_id = serializers.PrimaryKeyRelatedField(
+    movie = MovieSerializer(read_only=True)
+    movie_slug = serializers.SlugRelatedField(
         queryset=Movie.objects.all(),
+        slug_field='slug',
         write_only=True,
         source='movie'
     ) 

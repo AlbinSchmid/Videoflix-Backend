@@ -1,12 +1,46 @@
-from rest_framework import generics
-from movie_app.models import Movie, UserMovieProgress
-from .serializer import MovieSerializer, UserMovieProgressSerializer
+from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from datetime import timedelta
+from movie_app.models import Movie, UserMovieProgress
+from .serializer import MovieSerializer, UserMovieProgressSerializer
+from .exeptions import NoObjectWithThisSug
 
-class UserMovieProgressView(generics.ListCreateAPIView):
+
+class UserMovieProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = UserMovieProgressSerializer
+    lookup_field = 'slug'
+    queryset = UserMovieProgress.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        user_movie_progress = UserMovieProgress.objects.filter(
+            user=request.user, movie__slug=kwargs['slug']).first()
+        if user_movie_progress:
+            serializer = UserMovieProgressSerializer(
+                user_movie_progress, context={'request': request})
+            return Response(serializer.data, status=200)
+        raise NoObjectWithThisSug
+    
+    def patch(self, request, *args, **kwargs):
+        user_movie_progress = UserMovieProgress.objects.filter(
+            user=request.user, movie__slug=kwargs['slug']).first()
+        if user_movie_progress:
+            serializer = UserMovieProgressSerializer(
+                user_movie_progress,
+                data=request.data,
+                partial=True,
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=200)
+            return Response(serializer.errors, status=400)
+        raise NoObjectWithThisSug
+
+
+class UserMovieProgressListView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserMovieProgressSerializer
     queryset = UserMovieProgress.objects.all()
@@ -14,9 +48,18 @@ class UserMovieProgressView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def get(self, request, *args, **kwargs):
+        user_movie_progress = UserMovieProgress.objects.filter(
+            user=request.user).order_by('-updated_at')
+        if user_movie_progress.exists():
+            serializer = UserMovieProgressSerializer(
+                user_movie_progress, many=True, context={'request': request})
+            return Response(serializer.data, status=200)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class MovieListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = MovieSerializer
     queryset = Movie.objects.all()
 
@@ -30,21 +73,26 @@ class MovieListView(generics.ListAPIView):
         data = {}
         context = {'request': request}
 
-        for category in categories:
-            movies = Movie.objects.filter(category__iexact=category)[:10]
-            serializer = MovieSerializer(movies, many=True, context=context)
-            data[category.lower()] = serializer.data
-
         date_treshold = timezone.now() - timedelta(days=14)
         movies = Movie.objects.filter(created_at__gte=date_treshold)[:10]
         serializer = MovieSerializer(movies, many=True, context=context)
         data['new_on_videoflix'] = serializer.data
 
+        for category in categories:
+            movies = Movie.objects.filter(category__iexact=category)[:10]
+            serializer = MovieSerializer(movies, many=True, context=context)
+            data[category.lower()] = serializer.data
+
+        movie = UserMovieProgress.objects.filter(
+            user=request.user, finished=False).order_by('-updated_at')[:10]
+        serializer = UserMovieProgressSerializer(
+            movie, many=True, context=context)
+        data['continue_watching'] = serializer.data
+
+        movie = UserMovieProgress.objects.filter(
+            user=request.user, finished=True).order_by('-updated_at')[:10]
+        serializer = UserMovieProgressSerializer(
+            movie, many=True, context=context)
+        data['watched'] = serializer.data
+
         return Response(data)
-
-
-class MovieBySlugView(generics.RetrieveAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = MovieSerializer
-    lookup_field = 'slug'
-    queryset = Movie.objects.all()

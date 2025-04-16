@@ -53,6 +53,7 @@ class UserMovieProgress(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     progress_seconds = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
+    finished = models.BooleanField(default=False)
     
     class Meta: 
         unique_together = ('user', 'movie')
