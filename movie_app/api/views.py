@@ -1,15 +1,14 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from datetime import timedelta
 from movie_app.models import Movie, UserMovieProgress
 from .serializer import MovieSerializer, UserMovieProgressSerializer
 from .exeptions import NoObjectWithThisSug
-
+from user_auth_app.api.permissions import IsLoggedIn
 
 class UserMovieProgressDetailView(generics.RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLoggedIn]
     serializer_class = UserMovieProgressSerializer
     lookup_field = 'slug'
     queryset = UserMovieProgress.objects.all()
@@ -41,7 +40,7 @@ class UserMovieProgressDetailView(generics.RetrieveUpdateAPIView):
 
 
 class UserMovieProgressListView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLoggedIn]
     serializer_class = UserMovieProgressSerializer
     queryset = UserMovieProgress.objects.all()
 
@@ -59,7 +58,7 @@ class UserMovieProgressListView(generics.ListCreateAPIView):
 
 
 class MovieListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLoggedIn]
     serializer_class = MovieSerializer
     queryset = Movie.objects.all()
 

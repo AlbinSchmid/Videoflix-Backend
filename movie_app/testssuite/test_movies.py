@@ -18,7 +18,7 @@ class MovieTests(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(
-            response.data['detail'], 'Authentication credentials were not provided.')
+            response.data['detail'], 'Log in to your account to continue.')
 
     def test_get_movies_authenticated(self):
         self.client.force_authenticate(user=self.user)

@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -15,6 +15,7 @@ from django.contrib.auth.password_validation import validate_password
 from user_auth_app.models import CustomUser 
 from .serializers import RegistrationSerializer, UserSerializer, EmailLogInSerializer
 from .exeptions import *
+from .permissions import IsLoggedIn
 
 class CheckPasswordToken(APIView):
     def post(self, request):
@@ -116,6 +117,7 @@ class CheckEmailView(APIView):
 
 
 class ActivateUserView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
@@ -136,7 +138,7 @@ class ActivateUserView(APIView):
 
 
 class ProtectedView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLoggedIn]
 
     def get(self, request):
         serializer = UserSerializer(request.user)

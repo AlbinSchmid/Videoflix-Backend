@@ -33,7 +33,7 @@ class MovieProgressSlugTest(APITestCase):
     def test_get_unauthenticated(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data['detail'], 'Authentication credentials were not provided.')
+        self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_get_authenticated(self):
         self.client.force_authenticate(user=self.user)
@@ -54,7 +54,7 @@ class MovieProgressSlugTest(APITestCase):
     def test_patch_unauthenticated(self):
         response = self.client.patch(self.url, data={'progress_seconds': 60}, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data['detail'], 'Authentication credentials were not provided.')
+        self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_patch_authenticated(self):
         self.client.force_authenticate(user=self.user)

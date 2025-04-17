@@ -55,4 +55,10 @@ class IncorrectPassword(APIException):
     default_detail = 'The password you entered is incorrect.'
     default_code = 'incorrect password'
 
+class UserNotLoggedIn(APIException):
+    status_code = 401
+    default_detail = 'Log in to your account to continue.'
+    default_code = 'unauthorized'
+
+
 

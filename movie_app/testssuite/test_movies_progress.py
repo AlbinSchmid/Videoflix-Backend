@@ -29,7 +29,7 @@ class MovieProgressTest(APITestCase):
     def test_getunauthenticated(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data['detail'], 'Authentication credentials were not provided.')
+        self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_get_authenticated_not_exist(self):
         self.client.force_authenticate(user=self.user)
@@ -55,12 +55,11 @@ class MovieProgressTest(APITestCase):
     def test_post_unauthenticated(self):
         response = self.client.post(self.url, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data['detail'], 'Authentication credentials were not provided.')
+        self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_post_authenticated(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=self.data, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['user'], self.user.id)
         self.assertEqual(response.data['progress_seconds'], 0)
