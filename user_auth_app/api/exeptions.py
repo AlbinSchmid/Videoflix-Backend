@@ -45,4 +45,14 @@ class PasswordSameAsOld(APIException):
     default_detail = 'New password cannot be the same as the old one. Please choose a different password.'
     default_code = 'password same as old'
 
+class UserNotExistWithThisEmail(APIException):
+    status_code = 404
+    default_detail = 'We couldn’t find an account with that email address.'
+    default_code = 'user not found'
+
+class IncorrectPassword(APIException):
+    status_code = 400
+    default_detail = 'The password you entered is incorrect.'
+    default_code = 'incorrect password'
+
 

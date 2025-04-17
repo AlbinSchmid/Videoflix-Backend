@@ -8,8 +8,8 @@ from .serializer import MovieSerializer, UserMovieProgressSerializer
 from .exeptions import NoObjectWithThisSug
 
 
-class UserMovieProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [AllowAny]
+class UserMovieProgressDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = UserMovieProgressSerializer
     lookup_field = 'slug'
     queryset = UserMovieProgress.objects.all()
@@ -41,7 +41,7 @@ class UserMovieProgressDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserMovieProgressListView(generics.ListCreateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserMovieProgressSerializer
     queryset = UserMovieProgress.objects.all()
 

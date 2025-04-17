@@ -13,8 +13,8 @@ from django.contrib.auth.tokens import default_token_generator, PasswordResetTok
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from user_auth_app.models import CustomUser 
-from .serializers import RegistrationSerializer, UserSerializer
-from .exeptions import UserAlreadyVerified, IncorrectUrl, UserNotFound, NotVerifiedForgotPassword, PasswordNotMatch, PasswordSameAsOld, EmailOrPasswordIncorrect, NotVerified
+from .serializers import RegistrationSerializer, UserSerializer, EmailLogInSerializer
+from .exeptions import *
 
 class CheckPasswordToken(APIView):
     def post(self, request):
@@ -155,7 +155,12 @@ class CustomLogInView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
+        userExist = CustomUser.objects.filter(email=email).exists()
+        serializer = EmailLogInSerializer(data=request.data)
 
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         if user:
             if not user.is_active:
                 raise NotVerified
@@ -172,7 +177,9 @@ class CustomLogInView(APIView):
                 max_age=60 * 60 * 24,  # 1 Tag
             )
             return response
-        raise EmailOrPasswordIncorrect
+        if userExist:
+            raise IncorrectPassword
+        raise UserNotExistWithThisEmail
 
 
 class RegistrationView(APIView):
