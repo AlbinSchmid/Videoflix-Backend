@@ -73,12 +73,12 @@ class MovieListView(generics.ListAPIView):
         context = {'request': request}
 
         date_treshold = timezone.now() - timedelta(days=14)
-        movies = Movie.objects.filter(created_at__gte=date_treshold)[:10]
+        movies = Movie.objects.filter(created_at__gte=date_treshold).order_by('-created_at')[:10]
         serializer = MovieSerializer(movies, many=True, context=context)
         data['new_on_videoflix'] = serializer.data
 
         for category in categories:
-            movies = Movie.objects.filter(category__iexact=category)[:10]
+            movies = Movie.objects.filter(category__iexact=category).order_by('-created_at')[:10]
             serializer = MovieSerializer(movies, many=True, context=context)
             data[category.lower()] = serializer.data
 
