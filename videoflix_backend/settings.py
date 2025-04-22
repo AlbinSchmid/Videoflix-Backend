@@ -112,10 +112,10 @@ WSGI_APPLICATION = 'videoflix_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': 'localhost',
+        'NAME': 'mydb',
+        'USER': 'user',
+        'PASSWORD': 'password',
+        'HOST': 'db',  
         'PORT': '5432',
     }
 }
@@ -183,25 +183,22 @@ CACHES = {
     }
 }
 
-
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST = 'smtp.gmail.com'
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_PORT = 587
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
-        'PASSWORD': 'foobared',
         'DEFAULT_TIMEOUT': 360,
-        'DEFAULT_RESULT_TTL': 800,
-        'SOCKET_TIMEOUT': 20,   # Wichtig für Idle-Verbindungen
     },
 }
 
@@ -217,6 +214,6 @@ SIMPLE_JWT = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'user_auth_app.api.backends.EmailBackend',  # ← dein Custom-Backend
-    'django.contrib.auth.backends.ModelBackend',  # optional fallback
+    'user_auth_app.api.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',  
 ]

@@ -5,9 +5,23 @@ def convert_hls(slug, source, quality_name, quality_height):
     target_dir = os.path.join('media', 'movies', slug, quality_name)
     target = os.path.join(target_dir, f"{slug}_{quality_name}.m3u8")
     os.makedirs(target_dir, exist_ok=True)
-    cmd = 'ffmpeg -i {} -vf scale=-2:{} -c:v libx264 -profile:v baseline -level 3.0 -c:a aac -b:a 128k -ac 2 -hls_time 4 -hls_list_size 0 -f hls {}'.format(source, quality_height, target)
+    cmd = [
+        'ffmpeg',
+        '-i', source,
+        '-vf', f'scale=-2:{quality_height}',
+        '-c:v', 'libx264',
+        '-profile:v', 'baseline',
+        '-level', '3.0',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-ac', '2',
+        '-hls_time', '4',
+        '-hls_list_size', '0',
+        '-f', 'hls',
+        target
+    ]
     
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=True)
     if quality_height == 1080:
         create_master_playlist(slug)
 
