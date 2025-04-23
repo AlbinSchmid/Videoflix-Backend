@@ -33,7 +33,9 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '192.168.68.51'
+]
 
 
 # Application definition
@@ -74,14 +76,17 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:4200',
     'http://localhost:4200',
+    'http://192.168.68.51:4200',
 ]
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:4200',
     'http://localhost:4200',
+    'http://192.168.68.51:4200',
 ]
 
 
@@ -157,6 +162,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/staticfiles')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -166,6 +173,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'user_auth_app.api.authentication.CookieJWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+        'anon': '100/hour',   
+    }
 }
 
 CACHE_TTL = 60*15
@@ -173,14 +184,22 @@ CACHE_TTL = 60*15
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://redis:6379/1",
         "OPTIONS": {
-            "PASSWORD": config('REDIS_PASSWORD'),
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
 
         },
         "KEY_PREFIX": "videoflix"
     }
+}
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'redis',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    },
 }
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -193,18 +212,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 360,
-    },
-}
-
 IMPORT_EXPORT_USE_TRANSACTIONS = True
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/staticfiles')
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),

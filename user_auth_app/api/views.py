@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.throttling import UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -12,10 +13,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
-from user_auth_app.models import CustomUser 
+from user_auth_app.models import CustomUser
 from .serializers import RegistrationSerializer, UserSerializer, EmailLogInSerializer
 from .exeptions import *
 from .permissions import IsLoggedIn
+
 
 class CheckPasswordToken(APIView):
     def post(self, request):
@@ -27,11 +29,11 @@ class CheckPasswordToken(APIView):
             user = CustomUser.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             raise IncorrectUrl
-        
+
         if not default_token_generator.check_token(user, token):
             raise IncorrectUrl
         return Response(status=status.HTTP_200_OK)
-        
+
 
 class ResetPasswordView(APIView):
     def post(self, request):
@@ -45,28 +47,28 @@ class ResetPasswordView(APIView):
             user = CustomUser.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
             raise IncorrectUrl
-        
+
         if not user.is_active:
             raise NotVerifiedForgotPassword
-        
+
         if not default_token_generator.check_token(user, token):
             raise IncorrectUrl
-        
+
         if password != repeated_password:
             raise PasswordNotMatch
-        
+
         if check_password(password, user.password):
             raise PasswordSameAsOld
-                
+
         try:
             validate_password(password, user=user)
         except Exception as e:
-            raise ValidationError({"password": list(e.messages)})         
-        
+            raise ValidationError({"password": list(e.messages)})
+
         user.set_password(password)
         user.save()
         return Response({"detail": "Your password was reset successfully. You can now log in with your new password."}, status=200)
-                   
+
 
 class ForgotPasswordView(APIView):
 
@@ -90,7 +92,8 @@ class ForgotPasswordView(APIView):
                 })
                 text_content = 'Hello, to reset your password pleace contact our Support'
 
-                email = EmailMultiAlternatives(subject, text_content, from_email, to)
+                email = EmailMultiAlternatives(
+                    subject, text_content, from_email, to)
                 email.attach_alternative(html_content, "text/html")
                 email.send()
                 return Response({'message': 'We have sent you an email with instructions to reset your password.'}, status=200)
@@ -99,6 +102,7 @@ class ForgotPasswordView(APIView):
 
 
 class CheckEmailView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         email = request.data.get('email')
         user = CustomUser.objects.filter(email=email).exists()
@@ -118,6 +122,7 @@ class CheckEmailView(APIView):
 
 class ActivateUserView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
@@ -146,27 +151,37 @@ class ProtectedView(APIView):
 
 
 class LogoutView(APIView):
+    throttle_classes = [UserRateThrottle]
     def post(self, request):
         response = Response({"message": "Logout successful"})
-        response.delete_cookie('access_token') 
+        response.set_cookie(
+            key='access_token',
+            value='',          # leerer Wert
+            httponly=True,
+            secure=True,
+            samesite='None',
+            max_age=0,         # löscht den Cookie sofort
+            path='/',
+        )
         return response
 
 
 class CustomLogInView(APIView):
+    throttle_classes = [UserRateThrottle]
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
         userExist = CustomUser.objects.filter(email=email).exists()
         serializer = EmailLogInSerializer(data=request.data)
-
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
+
         if user:
             if not user.is_active:
                 raise NotVerified
-            
+
             refresh = RefreshToken.for_user(user)
 
             response = Response({'message': 'Login successful'})
@@ -193,3 +208,7 @@ class RegistrationView(APIView):
             user = serializer.save()
             return Response({'message': 'Registration successful! Please check your email to verify your account before logging in.'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+

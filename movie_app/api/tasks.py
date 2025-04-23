@@ -1,5 +1,14 @@
 import subprocess
 import os
+from PIL import Image
+from io import BytesIO
+
+def compress_image(image_path):
+    image = Image.open(image_path)
+    image = image.convert("RGB")
+    image.thumbnail((1280, 720))
+
+    image.save(image_path, format='JPEG', quality=75)
 
 def convert_hls(slug, source, quality_name, quality_height):
     target_dir = os.path.join('media', 'movies', slug, quality_name)

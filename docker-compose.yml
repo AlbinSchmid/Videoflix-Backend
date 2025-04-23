@@ -21,6 +21,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     environment:
       DATABASE_URL: postgres://user:password@db:5432/mydb
     volumes:
