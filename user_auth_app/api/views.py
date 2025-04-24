@@ -17,9 +17,11 @@ from user_auth_app.models import CustomUser
 from .serializers import RegistrationSerializer, UserSerializer, EmailLogInSerializer
 from .exeptions import *
 from .permissions import IsLoggedIn
+from rest_framework.throttling import ScopedRateThrottle
 
 
 class CheckPasswordToken(APIView):
+    throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'password_reset'
 
     def post(self, request):
@@ -208,6 +210,7 @@ class CustomLogInView(APIView):
 
 
 class RegistrationView(APIView):
+    throttle_classes = [ScopedRateThrottle]
     throttle_classes = 'registration'
 
     def post(self, request):

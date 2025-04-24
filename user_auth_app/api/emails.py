@@ -11,7 +11,7 @@ def send_welcome_email(user):
 
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    activation_link = f"http://localhost:4200/activate/{uid}/{token}"
+    activation_link = f"https://videoflix.albin-schmid.com/activate/{uid}/{token}"
 
     html_content = render_to_string('emails/confirm_email.html', {
         'activation_link': activation_link
