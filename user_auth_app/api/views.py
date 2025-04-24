@@ -20,6 +20,8 @@ from .permissions import IsLoggedIn
 
 
 class CheckPasswordToken(APIView):
+    throttle_scope = 'password_reset'
+
     def post(self, request):
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
@@ -36,6 +38,8 @@ class CheckPasswordToken(APIView):
 
 
 class ResetPasswordView(APIView):
+    throttle_scope = 'password_reset'
+
     def post(self, request):
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
@@ -71,6 +75,7 @@ class ResetPasswordView(APIView):
 
 
 class ForgotPasswordView(APIView):
+    throttle_scope = 'password_reset'
 
     def post(self, request):
         email = request.data.get('email')
@@ -122,6 +127,7 @@ class CheckEmailView(APIView):
 
 class ActivateUserView(APIView):
     permission_classes = [AllowAny]
+    throttle_scope = 'activation'
 
     def post(self, request):
         uidb64 = request.data.get('uid')
@@ -151,23 +157,25 @@ class ProtectedView(APIView):
 
 
 class LogoutView(APIView):
-    throttle_classes = [UserRateThrottle]
+    throttle_scope = 'login'
+
     def post(self, request):
         response = Response({"message": "Logout successful"})
         response.set_cookie(
             key='access_token',
-            value='',          # leerer Wert
+            value='',     
             httponly=True,
             secure=True,
             samesite='None',
-            max_age=0,         # löscht den Cookie sofort
+            max_age=0,  
             path='/',
         )
         return response
 
 
 class CustomLogInView(APIView):
-    throttle_classes = [UserRateThrottle]
+    throttle_scope = 'login'
+    
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -189,9 +197,9 @@ class CustomLogInView(APIView):
                 key='access_token',
                 value=str(refresh.access_token),
                 httponly=True,
-                secure=False,  # nur über HTTPS!
-                samesite='Lax',  # oder 'Strict'
-                max_age=60 * 60 * 24,  # 1 Tag
+                secure=False,  # True
+                samesite='Lax',  # None
+                max_age=60 * 60 * 24,
             )
             return response
         if userExist:
@@ -200,6 +208,7 @@ class CustomLogInView(APIView):
 
 
 class RegistrationView(APIView):
+    throttle_classes = 'registration'
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
