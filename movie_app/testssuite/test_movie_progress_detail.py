@@ -6,10 +6,10 @@ from movie_app.models import Movie, UserMovieProgress
 
 
 class MovieProgressSlugTest(APITestCase):
-
+    """Test case for movie progress API with slug."""
     @classmethod
     def setUpTestData(cls):
-        
+        """Set up test data for the test case."""
         cls.user = CustomUser.objects.create_user(
             email='test@gmail.com', password='testPassword123')
         cls.movie = Movie.objects.create(
@@ -31,11 +31,13 @@ class MovieProgressSlugTest(APITestCase):
         cls.url = reverse('movie-progress-detail', kwargs={'slug': cls.movie.slug})
 
     def test_get_unauthenticated(self):
+        """Test GET request without authentication."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_get_authenticated(self):
+        """Test GET request with authentication."""
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -45,6 +47,7 @@ class MovieProgressSlugTest(APITestCase):
         self.assertFalse(response.data['finished'])
 
     def test_get_authenticated_no_progress(self):
+        """Test GET request with authentication but no progress."""
         url = reverse('movie-progress-detail', kwargs={'slug': 'non-existent-movie'})
         self.client.force_authenticate(user=self.user)
         response = self.client.get(url)
@@ -52,11 +55,13 @@ class MovieProgressSlugTest(APITestCase):
         self.assertEqual(response.data['detail'], 'No object with this slug.')
 
     def test_patch_unauthenticated(self):
+        """Test PATCH request without authentication."""
         response = self.client.patch(self.url, data={'progress_seconds': 60}, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_patch_authenticated(self):
+        """Test PATCH request with authentication."""
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(self.url, data={'progress_seconds': 60}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -64,6 +69,7 @@ class MovieProgressSlugTest(APITestCase):
         self.assertEqual(self.movie_progress.progress_seconds, 60)
     
     def test_patch_authenticated_no_progress(self):
+        """Test PATCH request with authentication but no progress."""
         url = reverse('movie-progress-detail', kwargs={'slug': 'non-existent-movie'})
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(url, data={'progress_seconds': 60}, format='json')
@@ -71,6 +77,7 @@ class MovieProgressSlugTest(APITestCase):
         self.assertEqual(response.data['detail'], 'No object with this slug.')
 
     def test_patch_authenticated_invalid_data(self):
+        """Test PATCH request with invalid data."""
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(self.url, data={'progress_seconds': 'invalid'}, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -6,9 +6,10 @@ from movie_app.models import Movie, UserMovieProgress
 
 
 class MovieProgressTest(APITestCase):
-
+    """Test case for movie progress API."""
     @classmethod
     def setUpTestData(cls):
+        """Set up test data for the test case."""
         cls.url = reverse('movie-progress')
         cls.user = CustomUser.objects.create_user(
             email='test@gmail.com', password='testPassword123')
@@ -27,16 +28,19 @@ class MovieProgressTest(APITestCase):
         }
 
     def test_getunauthenticated(self):
+        """Test GET request without authentication."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_get_authenticated_not_exist(self):
+        """Test GET request with authentication but no progress."""
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_authenticated_exist(self):
+        """Test GET request with authentication and existing progress."""
         UserMovieProgress.objects.create(
             user=self.user,
             movie=self.movie,
@@ -53,11 +57,13 @@ class MovieProgressTest(APITestCase):
         self.assertFalse(response.data[0]['finished'], False)
 
     def test_post_unauthenticated(self):
+        """Test POST request without authentication."""
         response = self.client.post(self.url, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], 'Log in to your account to continue.')
 
     def test_post_authenticated(self):
+        """Test POST request with authentication."""
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=self.data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -67,6 +73,7 @@ class MovieProgressTest(APITestCase):
         self.assertFalse(response.data['finished'], False)
 
     def test_post_authenticated_incorrect_slug(self):
+        """Test POST request with authentication and incorrect movie slug."""
         self.client.force_authenticate(user=self.user)
         self.data['movie_slug'] = 'incorrect-slug'
         response = self.client.post(self.url, data=self.data, format='json')

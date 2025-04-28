@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 
 def compress_image(image_path):
+    """Compress the image to reduce its size."""
     image = Image.open(image_path)
     image = image.convert("RGB")
     image.thumbnail((1280, 720))
@@ -11,6 +12,7 @@ def compress_image(image_path):
     image.save(image_path, format='JPEG', quality=75)
 
 def convert_hls(slug, source, quality_name, quality_height):
+    """Convert the video to HLS format with the specified quality."""
     target_dir = os.path.join('media', 'movies', slug, quality_name)
     target = os.path.join(target_dir, f"{slug}_{quality_name}.m3u8")
     os.makedirs(target_dir, exist_ok=True)
@@ -38,6 +40,7 @@ def convert_hls(slug, source, quality_name, quality_height):
         os.remove(source)
 
 def create_master_playlist(slug):
+    """Create a master playlist for HLS streaming."""
     target_dir = os.path.join('media', 'movies', slug)
     master_path = os.path.join(target_dir, f"{slug}.m3u8")
     resolutions = [

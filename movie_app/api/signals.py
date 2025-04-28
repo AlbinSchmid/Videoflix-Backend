@@ -8,6 +8,7 @@ import shutil
 
 @receiver(post_save, sender=Movie)
 def video_post_save(sender, instance, created, **kwargs):
+    """Signal to handle video processing after saving a Movie instance."""
     if created:
         queue = django_rq.get_queue('default', autocommit=True)
         if instance.movie_cover:
@@ -21,6 +22,7 @@ def video_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Movie)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """Signal to delete video files and cover images when a Movie instance is deleted."""
     target_path = os.path.join("media", "movies", instance.slug)
 
     if instance.movie_cover:

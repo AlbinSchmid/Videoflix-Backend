@@ -2,8 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.throttling import UserRateThrottle
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -18,13 +17,17 @@ from .serializers import RegistrationSerializer, UserSerializer, EmailLogInSeria
 from .exeptions import *
 from .permissions import IsLoggedIn
 from rest_framework.throttling import ScopedRateThrottle
+from .emails import send_password_reset_email
+import django_rq
 
 
 class CheckPasswordToken(APIView):
+    """View to check if the password reset token is valid."""
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'password_reset'
 
     def post(self, request):
+        """Check if the password reset token is valid."""
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
 
@@ -40,9 +43,11 @@ class CheckPasswordToken(APIView):
 
 
 class ResetPasswordView(APIView):
+    """View to reset the password."""
     throttle_scope = 'password_reset'
 
     def post(self, request):
+        """Reset the password."""
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
         password = request.data.get('password')
@@ -77,40 +82,28 @@ class ResetPasswordView(APIView):
 
 
 class ForgotPasswordView(APIView):
+    """View to handle password reset requests."""
     throttle_scope = 'password_reset'
 
     def post(self, request):
+        """Handle password reset request."""
         email = request.data.get('email')
         user = CustomUser.objects.filter(email=email).first()
 
         if user:
             if user.is_active:
-                subject = 'Reset your Videoflix password'
-                from_email = 'noreply@videoflix.de'
-                to = [user.email]
-
-                token_generator = PasswordResetTokenGenerator()
-                token = token_generator.make_token(user)
-                uid = urlsafe_base64_encode(force_bytes(user.pk))
-                reset_link = f"http://localhost:4200/reset-password/{uid}/{token}"
-
-                html_content = render_to_string('emails/reset_password.html', {
-                    'reset_link': reset_link
-                })
-                text_content = 'Hello, to reset your password pleace contact our Support'
-
-                email = EmailMultiAlternatives(
-                    subject, text_content, from_email, to)
-                email.attach_alternative(html_content, "text/html")
-                email.send()
+                queue = django_rq.get_queue('default', autocommit=True)
+                queue.enqueue(send_password_reset_email, user)
                 return Response({'message': 'We have sent you an email with instructions to reset your password.'}, status=200)
             raise NotVerifiedForgotPassword
         raise UserNotFound
 
 
 class CheckEmailView(APIView):
+    """View to check if the email exists in the database."""
     permission_classes = [AllowAny]
     def post(self, request):
+        """Check if the email exists in the database."""
         email = request.data.get('email')
         user = CustomUser.objects.filter(email=email).exists()
 
@@ -128,10 +121,12 @@ class CheckEmailView(APIView):
 
 
 class ActivateUserView(APIView):
+    """View to activate the user account."""
     permission_classes = [AllowAny]
     throttle_scope = 'activation'
 
     def post(self, request):
+        """Activate the user account."""
         uidb64 = request.data.get('uid')
         token = request.data.get('token')
         try:
@@ -151,17 +146,21 @@ class ActivateUserView(APIView):
 
 
 class ProtectedView(APIView):
+    """View to check if the user is logged in."""
     permission_classes = [IsLoggedIn]
 
     def get(self, request):
+        """Check if the user is logged in."""
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
 
 class LogoutView(APIView):
+    """View to handle user logout."""
     throttle_scope = 'login'
 
     def post(self, request):
+        """Handle user logout."""
         response = Response({"message": "Logout successful"})
         response.set_cookie(
             key='access_token',
@@ -176,9 +175,11 @@ class LogoutView(APIView):
 
 
 class CustomLogInView(APIView):
+    """View for user login."""
     throttle_scope = 'login'
     
     def post(self, request):
+        """Handle user login."""
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
@@ -210,10 +211,12 @@ class CustomLogInView(APIView):
 
 
 class RegistrationView(APIView):
+    """View for user registration."""
     throttle_classes = [ScopedRateThrottle]
     throttle_classes = 'registration'
 
     def post(self, request):
+        """Register a new user"""
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():

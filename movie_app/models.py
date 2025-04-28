@@ -6,6 +6,7 @@ from user_auth_app.models import CustomUser
 
 
 class Movie(models.Model):
+    """Model to represent a movie."""
     CATEGORY_CHOICES = [
         ('Action', 'Action'),
         ('Adventure', 'Adventure'),
@@ -43,12 +44,14 @@ class Movie(models.Model):
     license_url = models.CharField(max_length=255, default='', blank=True)
 
     def save(self, *args, **kwargs):
+        """Override save method to set slug if not provided."""
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
 
 class UserMovieProgress(models.Model):
+    """Model to track user movie progress."""
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     progress_seconds = models.IntegerField(default=0)
@@ -56,4 +59,5 @@ class UserMovieProgress(models.Model):
     finished = models.BooleanField(default=False)
     
     class Meta: 
+        """Meta class for UserMovieProgress."""
         unique_together = ('user', 'movie')
