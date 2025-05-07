@@ -30,53 +30,53 @@ Videoflix ist ein leistungsfähiges und skalierbares Backend für eine Video-Str
 
 ## 📦 Installation
 
-### Voraussetzungen
+  ### Voraussetzungen
 
-- Python 3.11+
-- PostgreSQL 
-- Redis
+  - Python 3.11+
+  - PostgreSQL 
+  - Redis
 
-### Schritt-für-Schritt Installation
+  ### Schritt-für-Schritt Installation
 
-```
-# Repository klonen
-git clone https://github.com/deinusername/videoflix-backend.git
-cd videoflix-backend
+  ```
+  # Repository klonen
+  git clone https://github.com/deinusername/videoflix-backend.git
+  cd videoflix-backend
 
-# Virtuelle Umgebung einrichten
-python -m venv venv
-source venv/bin/activate
+  # Virtuelle Umgebung einrichten
+  python -m venv venv
+  source venv/bin/activate
 
-# Abhängigkeiten installieren
-pip install -r requirements.txt
+  # Abhängigkeiten installieren
+  pip install -r requirements.txt
 
-# .env-Datei erstellen
-cp .env.example .env
-```
+  # .env-Datei erstellen
+  cp .env.example .env
+  ```
 
-### Umgebungsvariablen konfigurieren
+  ### Umgebungsvariablen konfigurieren
 
-Bearbeite die .env-Datei mit deinen eigenen Zugangsdaten:
+  Bearbeite die .env-Datei mit deinen eigenen Zugangsdaten:
 
-```
-DEBUG=True
-SECRET_KEY=dein-geheimer-schlüssel
-DATABASE_URL=postgres://user:password@localhost:5432/videoflix
-REDIS_URL=redis://localhost:6379/0
-```
+  ```
+  DEBUG=True
+  SECRET_KEY=dein-geheimer-schlüssel
+  DATABASE_URL=postgres://user:password@localhost:5432/videoflix
+  REDIS_URL=redis://localhost:6379/0
+  ```
 
-### Datenbank initialisieren
+  ### Datenbank initialisieren
 
-```
-python manage.py migrate
-python manage.py createsuperuser
-```
+  ```
+  python manage.py migrate
+  python manage.py createsuperuser
+  ```
 
-### Server starten
+  ### Server starten
 
-```
-python manage.py runserver
-```
+  ```
+  python manage.py runserver
+  ```
 
 ---
 
