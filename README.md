@@ -40,7 +40,7 @@ Videoflix ist ein leistungsfähiges und skalierbares Backend für eine Video-Str
 
   ```
   # Repository klonen
-  git clone https://github.com/deinusername/videoflix-backend.git
+  git clone git@github.com:AlbinSchmid/Videoflix-Backend.git
   cd videoflix-backend
 
   # Virtuelle Umgebung einrichten
