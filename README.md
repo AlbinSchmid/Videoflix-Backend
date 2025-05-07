@@ -30,13 +30,13 @@ Videoflix ist ein leistungsfähiges und skalierbares Backend für eine Video-Str
 
 ## 📦 Installation
 
-# Voraussetzungen
+### Voraussetzungen
 
 - Python 3.11+
 - PostgreSQL 
 - Redis
 
-# Schritt-für-Schritt Installation
+### Schritt-für-Schritt Installation
 
 ```
 # Repository klonen
@@ -54,7 +54,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-# Umgebungsvariablen konfigurieren
+### Umgebungsvariablen konfigurieren
 
 Bearbeite die .env-Datei mit deinen eigenen Zugangsdaten:
 
@@ -65,14 +65,14 @@ DATABASE_URL=postgres://user:password@localhost:5432/videoflix
 REDIS_URL=redis://localhost:6379/0
 ```
 
-# Datenbank initialisieren
+### Datenbank initialisieren
 
 ```
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-# Server starten
+### Server starten
 
 ```
 python manage.py runserver
@@ -128,8 +128,3 @@ Dieses Projekt steht unter der MIT-Lizenz.
 ## 🙋 Support & Mitwirken
 
 Erstelle gerne Issues oder Pull Requests, um bei der Entwicklung zu helfen oder Fehler zu melden!
-
-
-
-
-
