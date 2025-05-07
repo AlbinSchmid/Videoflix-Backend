@@ -30,8 +30,8 @@ Videoflix ist ein leistungsfähiges und skalierbares Backend für eine Video-Str
 
 ## 📦 Installation
 
-  ### Voraussetzungen
-
+>### Voraussetzungen
+ 
   - Python 3.11+
   - PostgreSQL 
   - Redis
